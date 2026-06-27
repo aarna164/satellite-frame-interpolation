@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SatelliteFlow — AI Frame Interpolation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: #0a0f1e;
+            color: #f0eeea;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1D9E75;
+        }
+
+        .logo span { color: #f0eeea; }
+
+        .badge {
+            background: rgba(29,158,117,0.15);
+            border: 1px solid rgba(29,158,117,0.4);
+            color: #1D9E75;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .hero {
+            padding: 40px 40px 20px;
+        }
+
+        .hero h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            color: rgba(240,238,234,0.5);
+            font-size: 14px;
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            padding: 20px 40px;
+        }
+
+        .metric-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: rgba(240,238,234,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1D9E75;
+        }
+
+        .metric-sub {
+            font-size: 12px;
+            color: rgba(240,238,234,0.3);
+            margin-top: 4px;
+        }
+
+        .frames-section {
+            padding: 20px 40px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: rgba(240,238,234,0.8);
+        }
+
+        .frames-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .frame-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .frame-card.highlight {
+            border-color: rgba(29,158,117,0.5);
+        }
+
+        .frame-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .frame-title {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .frame-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            color: rgba(240,238,234,0.5);
+        }
+
+        .frame-tag.ai {
+            background: rgba(29,158,117,0.2);
+            color: #1D9E75;
+        }
+
+        .frame-img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            display: block;
+            background: #111;
+        }
+
+        .frame-footer {
+            padding: 10px 16px;
+            font-size: 12px;
+            color: rgba(240,238,234,0.35);
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 0 40px 40px;
+        }
+
+        .info-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .info-card h3 {
+            font-size: 13px;
+            color: rgba(240,238,234,0.5);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 13px;
+        }
+
+        .info-item:last-child { border-bottom: none; }
+
+        .info-item span:first-child {
+            color: rgba(240,238,234,0.5);
+        }
+
+        .info-item span:last-child {
+            color: #f0eeea;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: rgba(240,238,234,0.2);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Satellite<span>Flow</span></div>
+    <div class="badge">ISRO Hackathon 2026 · PS-12</div>
+</header>
+
+<div class="hero">
+    <h1>AI-Powered Satellite Frame Interpolation</h1>
+    <p>GOES-19 ABI Channel 13 · Thermal IR · 2026-01-01 · Pretrained RIFE Model</p>
+</div>
+
+<div class="metrics-row">
+    <div class="metric-card">
+        <div class="metric-label">SSIM Score</div>
+        <div class="metric-value">0.5824</div>
+        <div class="metric-sub">Structural Similarity</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">PSNR</div>
+        <div class="metric-value">16.07 dB</div>
+        <div class="metric-sub">Peak Signal-to-Noise Ratio</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">MSE</div>
+        <div class="metric-value">0.0247</div>
+        <div class="metric-sub">Mean Squared Error</div>
+    </div>
+</div>
+
+<div class="frames-section">
+    <div class="section-title">Frame Comparison — Original vs AI Interpolated</div>
+    <div class="frames-grid">
+        <div class="frame-card">
+            <div class="frame-header">
+                <span class="frame-title">Frame A — T = 0 min</span>
+                <span class="frame-tag">Original</span>
+            </div>
+            <img class="frame-img" src="../interpolation_result.png" alt="Frame A">
+            <div class="frame-footer">GOES-19 · 2026-01-01 05:40 UTC</div>
+        </div>
+        <div class="frame-card highlight">
+            <div class="frame-header">
+                <span class="frame-title">AI Interpolated — T = 10 min</span>
+                <span class="frame-tag ai">AI Generated</span>
+            </div>
+            <img class="frame-img" src="../interpolation_result.png" alt="Interpolated">
+            <div class="frame-footer">Generated by RIFE · Not real satellite data</div>
+        </div>
+        <div class="frame-card">
+            <div class="frame-header">
+                <span class="frame-title">Ground Truth — T = 10 min</span>
+                <span class="frame-tag">Original</span>
+            </div>
+            <img class="frame-img" src="../interpolation_result.png" alt="Ground Truth">
+            <div class="frame-footer">GOES-19 · 2026-01-01 05:50 UTC · Real frame</div>
+        </div>
+        <div class="frame-card">
+            <div class="frame-header">
+                <span class="frame-title">Frame B — T = 20 min</span>
+                <span class="frame-tag">Original</span>
+            </div>
+            <img class="frame-img" src="../interpolation_result.png" alt="Frame B">
+            <div class="frame-footer">GOES-19 · 2026-01-01 06:00 UTC</div>
+        </div>
+    </div>
+</div>
+
+<div class="info-row">
+    <div class="info-card">
+        <h3>Dataset Info</h3>
+        <div class="info-item">
+            <span>Satellite</span>
+            <span>GOES-19</span>
+        </div>
+        <div class="info-item">
+            <span>Channel</span>
+            <span>ABI Channel 13 (Thermal IR)</span>
+        </div>
+        <div class="info-item">
+            <span>Resolution</span>
+            <span>5424 × 5424 pixels</span>
+        </div>
+        <div class="info-item">
+            <span>Input interval</span>
+            <span>20 minutes</span>
+        </div>
+        <div class="info-item">
+            <span>Output interval</span>
+            <span>10 minutes</span>
+        </div>
+    </div>
+    <div class="info-card">
+        <h3>Model Info</h3>
+        <div class="info-item">
+            <span>Model</span>
+            <span>RIFE HDv3</span>
+        </div>
+        <div class="info-item">
+            <span>Framework</span>
+            <span>PyTorch</span>
+        </div>
+        <div class="info-item">
+            <span>Status</span>
+            <span>Pretrained (no fine-tuning)</span>
+        </div>
+        <div class="info-item">
+            <span>Input size</span>
+            <span>512 × 512</span>
+        </div>
+        <div class="info-item">
+            <span>Data source</span>
+            <span>NOAA AWS S3</span>
+        </div>
+    </div>
+</div>
+
+<footer>
+    SatelliteFlow · ISRO Hackathon 2026 · Problem Statement 12 · Built with RIFE + Python + Flask
+</footer>
+
+</body>
+</html>
