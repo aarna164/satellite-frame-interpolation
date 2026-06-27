@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Satellite Frame Interpolation
 ## ISRO Hackathon 2026 — Problem Statement 12
 
@@ -24,3 +25,6 @@ GOES-19 ABI Channel 13 — NOAA AWS Public Bucket
 pip install netCDF4 numpy opencv-python torch torchvision flask scikit-image matplotlib
 python interpolate.py
 ```
+=======
+# satellite-frame-interpolation
+>>>>>>> 295b92b56b6a907da2a1353b69b5f13f6f5bbdac
